@@ -3,6 +3,26 @@
 Code for [*MaskGAN: Better Text Generation via Filling in the
 ______*](https://arxiv.org/abs/1801.07736) published at ICLR 2018.
 
+## For running on HPC:
+
+On your local machine, create a virtual environment:
+
+`virtualenv maskgan-env`
+
+Enter the environment:
+
+`source maskgan-env/bin/activate`
+
+Install dependencies:
+
+`pip install -r requirements.txt`
+
+Exit the environment:
+
+`deactivate`
+
+Copy the entire directory to your HPC space and submit a job using `run.s`. Make sure you add your net id
+
 ## Requirements
 
 *   TensorFlow >= v1.3
