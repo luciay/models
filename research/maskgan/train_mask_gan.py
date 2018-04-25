@@ -221,6 +221,7 @@ def create_hparams():
       rl_discount_rate=0.9,
       gen_vd_keep_prob=0.5,
       dis_vd_keep_prob=0.5,
+      gen_pretrain_learning_rate=5e-4,
       dis_pretrain_learning_rate=5e-3,
       dis_num_filters=128,
       dis_hidden_dim=128,
@@ -334,11 +335,10 @@ def create_MaskGAN(hparams, is_training):
 
   ## Pre-training.
   if FLAGS.gen_pretrain_steps:
-    raise NotImplementedError
     # # TODO(liamfedus): Rewrite this.
-    # fwd_cross_entropy_loss = tf.reduce_mean(fwd_cross_entropy_losses)
-    # gen_pretrain_op = model_optimization.create_gen_pretrain_op(
-    #     hparams, fwd_cross_entropy_loss, global_step)
+    fwd_cross_entropy_loss = tf.reduce_mean(fake_cross_entropy_losses)
+    gen_pretrain_op = model_optimization.create_gen_pretrain_op(
+        hparams, fwd_cross_entropy_loss, global_step)
   else:
     gen_pretrain_op = None
   if FLAGS.dis_pretrain_steps:
