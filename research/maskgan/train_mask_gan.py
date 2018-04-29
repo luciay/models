@@ -14,7 +14,6 @@
 # ==============================================================================
 
 """Launch example:
-
 [IMDB]
 python train_mask_gan.py --data_dir
 /tmp/imdb  --data_set imdb  --batch_size 128
@@ -57,6 +56,7 @@ from model_utils import helper
 from model_utils import model_construction
 from model_utils import model_losses
 from model_utils import model_optimization
+
 
 # Data.
 from model_utils import model_utils
@@ -237,12 +237,10 @@ def create_hparams():
 
 def create_MaskGAN(hparams, is_training):
   """Create the MaskGAN model.
-
   Args:
     hparams:  Hyperparameters for the MaskGAN.
     is_training:  Boolean indicating operational mode (train/inference).
       evaluated with a teacher forcing regime.
-
   Return:
     model:  Namedtuple for specifying the MaskGAN.
   """
@@ -367,7 +365,7 @@ def create_MaskGAN(hparams, is_training):
 
   ## Discriminator Train Op.
   dis_train_op, dis_grads, dis_vars = model_optimization.create_dis_train_op(
-      hparams, dis_loss, global_step)
+      hparams, learning_rate, dis_loss, global_step)
 
   ## Critic Train Op.
   if critic_loss is not None:
@@ -428,7 +426,7 @@ def create_MaskGAN(hparams, is_training):
   text_summary_op = tf.summary.text('Samples', text_summary_placeholder)
 
   # Model saver.
-  saver = tf.train.Saver(keep_checkpoint_every_n_hours=1, max_to_keep=5)
+  saver = tf.train.Saver(keep_checkpoint_every_n_hours=1, max_to_keep=None)
 
   # Named tuple that captures elements of the MaskGAN model.
   Model = collections.namedtuple('Model', [
@@ -454,6 +452,7 @@ def create_MaskGAN(hparams, is_training):
       gen_pretrain_op, dis_pretrain_op, merge_summaries_op, global_step,
       new_learning_rate, learning_rate_update, saver, text_summary_op,
       text_summary_placeholder)
+
   return model
 
 
@@ -492,7 +491,6 @@ def get_iterator(data):
 
 def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
   """Train model.
-
   Args:
     hparams: Hyperparameters for the MaskGAN.
     data: Data to evaluate.
@@ -544,7 +542,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
             is_chief=is_chief,
             saver=model.saver,
             global_step=model.global_step,
-            save_model_secs=60,
+            save_model_secs=3600,
             recovery_wait_secs=30,
             summary_op=None,
             init_fn=init_fn)
@@ -731,7 +729,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
               avg_epoch_dis_loss.append(dis_loss_eval)
               avg_epoch_gen_loss.append(gen_loss_eval)
 
-              ## Summaries.
+              ## Summaries
               # Calulate rolling perplexity.
               perplexity = np.exp(cumulative_costs / gen_iters)
 
@@ -827,9 +825,11 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
                     avg_epoch_gen_loss)
 
                 if FLAGS.gen_training_strategy == 'reinforce':
+                  print('GENERATING RL LOGS')
                   evaluation_utils.generate_RL_logs(sess, model, log,
                                                     id_to_word, train_feed)
                 else:
+                  print('GENERATING LOGS')
                   evaluation_utils.generate_logs(sess, model, log, id_to_word,
                                                  train_feed)
                 log.flush()
@@ -840,7 +840,6 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
                   data_ngram_counts, eval_saver):
   """Evaluate model for a number of steps.
-
   Args:
     data:  Dataset.
     sv: Supervisor.
@@ -1005,7 +1004,6 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
 def evaluate_model(hparams, data, train_dir, log, id_to_word,
                    data_ngram_counts):
   """Evaluate MaskGAN model.
-
   Args:
     hparams:  Hyperparameters for the MaskGAN.
     data: Data to evaluate.
