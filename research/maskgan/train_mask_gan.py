@@ -166,6 +166,10 @@ tf.app.flags.DEFINE_float('eval_interval_secs', 60,
 tf.app.flags.DEFINE_integer(
     'n_gram_eval', 4, """The degree of the n-grams to use for evaluation.""")
 tf.app.flags.DEFINE_integer(
+    'step_size', 10, "How often you want to save a checkpoint, given the global step size.")
+tf.app.flags.DEFINE_integer(
+    'max_step', 100, "Last global step at which to save a checkpoint.")
+tf.app.flags.DEFINE_integer(
     'epoch_size_override', None,
     'If an integer, this dictates the size of the epochs and will potentially '
     'not iterate over all the data.')
@@ -730,6 +734,9 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
               avg_epoch_gen_loss.append(gen_loss_eval)
 
               ## Summaries
+              # added saving checkpoint per step, previously only per seconds
+              if step == 0 or step % FLAGS.step_size == 0 and step < FLAGS.max_step:
+                model.saver.save(sess, './saved-ckpts/gan-ckpt', global_step=step)
               # Calulate rolling perplexity.
               perplexity = np.exp(cumulative_costs / gen_iters)
 
