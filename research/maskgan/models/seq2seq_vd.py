@@ -250,7 +250,7 @@ def gen_decoder(hparams,
   """
   gen_decoder_rnn_size = hparams.gen_rnn_size
 
-  targets = tf.Print(targets, [targets], message='targets', summarize=50)
+  # targets = tf.Print(targets, [targets], message='targets', summarize=50)
   if FLAGS.seq2seq_share_embedding:
     with tf.variable_scope('decoder/rnn', reuse=True):
       embedding = tf.get_variable('embedding',
@@ -554,10 +554,10 @@ def discriminator(hparams,
   masked_inputs = transform_input_with_is_missing_token(inputs, targets_present)
 
   # Confirm masking.
-  masked_inputs = tf.Print(
-      masked_inputs, [inputs, targets_present, masked_inputs, sequence],
-      message='inputs, targets_present, masked_inputs, sequence',
-      summarize=10)
+  # masked_inputs = tf.Print(
+  #     masked_inputs, [inputs, targets_present, masked_inputs, sequence],
+  #     message='inputs, targets_present, masked_inputs, sequence',
+  #     summarize=10)
 
   with tf.variable_scope('dis', reuse=reuse):
     encoder_states = dis_encoder(
