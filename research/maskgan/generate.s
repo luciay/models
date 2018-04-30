@@ -26,10 +26,11 @@ python $base_dir/generate_samples.py \
  --batch_size=256 \
  --sequence_length=20 \
  --base_directory=$base_dir \
- --output_path=$HOME \
+ --output_path=$HOME/generated-outputs \
  --sample_mode=TRAIN \
  --output_masked_logs=False \
- --maskgan_ckpt=$base_dir/train/model.ckpt-20 \
+ --output_original_inputs=True \
+ --maskgan_ckpt=$base_dir/train/model.ckpt-0 \
  --hparams="gen_rnn_size=650,dis_rnn_size=650,gen_num_layers=2,gen_vd_keep_prob=0.33971" \
  --generator_model='seq2seq_vd' \
  --discriminator_model='seq2seq_vd' \
@@ -41,5 +42,30 @@ python $base_dir/generate_samples.py \
  --mask_strategy=contiguous \
  --baseline_method=critic \
  --number_epochs=1
+
+for ((i=10;i<=100;i+=10)); do
+	python $base_dir/generate_samples.py \
+ 	--data_dir=$data_dir \
+ 	--data_set=ptb \
+ 	--batch_size=256 \
+ 	--sequence_length=20 \
+ 	--base_directory=$base_dir \
+ 	--output_path=$HOME/generated-outputs \
+ 	--sample_mode=TRAIN \
+ 	--output_masked_logs=False \
+	--output_original_inputs=False \
+	--step_ckpt="$i" \
+	--maskgan_ckpt=$HOME/saved-ckpts/gan-ckpt-"$i" \
+ 	--hparams="gen_rnn_size=650,dis_rnn_size=650,gen_num_layers=2,gen_vd_keep_prob=0.33971" \
+ 	--generator_model='seq2seq_vd' \
+ 	--discriminator_model='seq2seq_vd' \
+ 	--is_present_rate=0.5  \
+ 	--dis_share_embedding=True \
+	--seq2seq_share_embedding=True \
+ 	--attention_option=luong \
+ 	--mask_strategy=contiguous \
+ 	--baseline_method=critic \
+ 	--number_epochs=1;
+done
 
 deactivate
