@@ -120,7 +120,7 @@ def chrf(reference, predict):
 	
 	return result
 
-def main(step_size=10, max_step=100):
+def main(step_size=1000, max_step=200000):
 	import numpy as np
 	# set file paths
 	import os

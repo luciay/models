@@ -43,7 +43,7 @@ python $base_dir/generate_samples.py \
  --baseline_method=critic \
  --number_epochs=1
 
-for ((i=10;i<=100;i+=10)); do
+for ((i=1000;i<=200000;i+=1000)); do
 	python $base_dir/generate_samples.py \
  	--data_dir=$data_dir \
  	--data_set=ptb \
