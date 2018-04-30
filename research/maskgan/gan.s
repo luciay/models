@@ -8,16 +8,16 @@
 #SBATCH --job-name=maskgan
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ly571@nyu.edu
-#SBATCH --output=gan.out
+#SBATCH --output=gan_%j.out
 #SBATCH --gres=gpu:1
 
 module purge
 
 source maskgan-env/bin/activate
-HOME=/home/$USER
-data_dir=$HOMEmaskgan/tmp/ptb
-base_dir=$HOME/maskgan2/maskgan
-module purge
+HOME=/scratch/$USER
+data_dir=$HOME/maskgan/tmp/ptb
+base_dir=$HOME/maskgan
+
 module load tensorflow/python2.7/1.5.0
 
 python $base_dir/train_mask_gan.py \
@@ -26,9 +26,8 @@ python $base_dir/train_mask_gan.py \
  --sequence_length=20 \
  --base_directory=$base_dir \
  --mask_strategy=contiguous \
- --maskgan_ckpt=None \
  --step_size=1000 \
- --max_step=200000 \
+ --max_step=70000 \
  --hparams="gen_rnn_size=650,dis_rnn_size=650,gen_num_layers=2,dis_num_layers=2,gen_learning_rate=0.000038877,gen_learning_rate_decay=1.0,gen_full_learning_rate_steps=2000000,gen_vd_keep_prob=0.33971,rl_discount_rate=0.89072,dis_learning_rate=5e-4,baseline_decay=0.99,dis_train_iterations=2,dis_pretrain_learning_rate=0.005,critic_learning_rate=5.1761e-7,dis_vd_keep_prob=0.71940" \
  --mode='TRAIN' \
  --max_steps=1 \
