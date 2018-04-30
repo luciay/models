@@ -60,8 +60,13 @@ tf.app.flags.DEFINE_string('output_path', '/tmp', 'Model output directory.')
 tf.app.flags.DEFINE_boolean(
     'output_masked_logs', False,
     'Whether to display for human evaluation (show masking).')
+tf.app.flags.DEFINE_boolean(
+    'output_original_inputs', False,
+    'Whether to output a file that contains original inputs.')
 tf.app.flags.DEFINE_integer('number_epochs', 1,
                             'The number of epochs to produce.')
+tf.app.flags.DEFINE_integer('step_ckpt', 0,
+                            'The global step that corresponds with this generated samples output.')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -171,7 +176,7 @@ def generate_samples(hparams, data, id_to_word, log_dir, output_file):
 
     # Create the supervisor.  It will take care of initialization, summaries,
     # checkpoints, and recovery.
-    sv = tf.Supervisor(
+    sv = tf.train.Supervisor(
         logdir=log_dir,
         is_chief=is_chief,
         saver=model.saver,
@@ -198,7 +203,7 @@ def generate_samples(hparams, data, id_to_word, log_dir, output_file):
         iterator = get_iterator(data)
         for x, y, _ in iterator:
           if FLAGS.eval_language_model:
-            is_present_rate = 0.
+            is_present_rate = 0.5
           else:
             is_present_rate = FLAGS.is_present_rate
           tf.logging.info(
@@ -211,6 +216,11 @@ def generate_samples(hparams, data, id_to_word, log_dir, output_file):
           p = model_utils.generate_mask()
 
           eval_feed = {model.inputs: x, model.targets: y, model.present: p}
+          # output inputs in same order as newly generated outputs
+          if FLAGS.output_original_inputs:
+            with open(FLAGS.output_path+'/original_inputs.txt', 'w') as f:
+              for item in helper.convert_to_human_readable(id_to_word, x, FLAGS.batch_size):
+                f.write(item+'\n')
 
           if FLAGS.data_set == 'ptb':
             # Statefulness for *evaluation* Generator.
@@ -241,8 +251,10 @@ def main(_):
   log_dir = FLAGS.base_directory
 
   tf.gfile.MakeDirs(FLAGS.output_path)
+  # have file output name correspond to the global step
+  output_name = 'reviews-'+str(FLAGS.step_ckpt)+'.txt'
   output_file = tf.gfile.GFile(
-      os.path.join(FLAGS.output_path, 'reviews.txt'), mode='w')
+      os.path.join(FLAGS.output_path, output_name), mode='w')
 
   # Load data set.
   if FLAGS.data_set == 'ptb':
